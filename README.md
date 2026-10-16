@@ -238,6 +238,8 @@ my laptop, the GitHub Actions run, and the EKS cluster on AWS).
 | EKS up: terraform output, nodes, pods | [23](screenshots/23-eks-cluster.png) |
 | AWS console: VPC, subnets, EKS cluster, nodes | [24](screenshots/24-aws-vpc.png), [25](screenshots/25-aws-subnets.png), [26](screenshots/26-aws-eks-cluster.png), [27](screenshots/27-aws-eks-nodes.png) |
 | terraform destroy | [28](screenshots/28-terraform-destroy.png) |
+| pipeline green incl. deploy, deploy log | [31](screenshots/31-actions-green.png), [32](screenshots/32-actions-deploy.png) |
+| GHCR packages with sha tags | [29 backend](screenshots/29-ghcr-backend.png), [30 frontend](screenshots/30-ghcr-frontend.png) |
 | git log | [21](screenshots/21-git-log.png) |
 
 ## Troubleshooting demo

@@ -104,4 +104,4 @@ jobs:
           kubectl get pods,svc,ingress,hpa -n shopadmin
           kubectl port-forward -n shopadmin svc/frontend 8080:8080 &
           sleep 3
-          curl -sf localhost:8080/api/products/stats
+          curl -sf localhost:8080/api/products/stats && echo
