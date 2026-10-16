@@ -1,0 +1,6 @@
+# tag is set by the pipeline to the commit sha
+pullPolicy: IfNotPresent
+ingress:
+  host: ""
+postgres:
+  storage: 5Gi

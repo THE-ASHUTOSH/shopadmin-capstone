@@ -1,0 +1,7 @@
+# images built straight into minikube with `minikube image build`
+tag: local
+pullPolicy: Never
+backend:
+  image: shopadmin-backend
+frontend:
+  image: shopadmin-frontend

@@ -1,0 +1,6 @@
+apiVersion: v2
+name: shopadmin
+description: Ecommerce admin app - react frontend, fastapi backend, postgres
+type: application
+version: 0.1.0
+appVersion: "1.0.0"

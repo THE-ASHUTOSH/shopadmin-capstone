@@ -1,0 +1,32 @@
+tag: latest
+pullPolicy: IfNotPresent
+
+backend:
+  image: ghcr.io/the-ashutosh/shopadmin-backend
+  replicas: 2
+  resources:
+    requests: { cpu: 100m, memory: 128Mi }
+    limits: { cpu: 500m, memory: 256Mi }
+
+frontend:
+  image: ghcr.io/the-ashutosh/shopadmin-frontend
+  replicas: 2
+  resources:
+    requests: { cpu: 50m, memory: 32Mi }
+    limits: { cpu: 200m, memory: 64Mi }
+
+postgres:
+  user: shop
+  password: shop
+  db: shop
+  storage: 1Gi
+
+ingress:
+  enabled: true
+  className: nginx
+  host: shopadmin.local
+
+hpa:
+  min: 2
+  max: 5
+  cpu: 60
