@@ -139,6 +139,17 @@ What the chart creates:
 The backend pods wait for postgres with an init container, and migrations take a postgres lock, so two pods
 starting together don't both try to create the table.
 
+The postgres password is random. The chart makes one on first install and reuses it from the `db` Secret on
+every upgrade. Pass `--set postgres.password=...` if you want your own.
+
+If a pod is stuck in `ImagePullBackOff` with `network is unreachable` (minikube trying IPv6 to quay.io), pull it
+on the host and load it in:
+
+```bash
+docker pull <image> && minikube image load <image>
+kubectl delete pod -n <ns> <pod>
+```
+
 ### Open the app through the ingress
 
 On Windows/mac with the docker driver the minikube IP isn't reachable, so run `minikube tunnel` in another
