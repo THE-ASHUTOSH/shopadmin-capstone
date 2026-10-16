@@ -10,6 +10,10 @@ spec:
     metadata:
       labels: { app: backend }
     spec:
+      initContainers:
+        - name: wait-for-db
+          image: postgres:16-alpine
+          command: ["sh", "-c", "until pg_isready -h postgres; do sleep 2; done"]
       containers:
         - name: backend
           image: {{ .Values.backend.image }}:{{ .Values.tag }}
