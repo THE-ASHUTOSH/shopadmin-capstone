@@ -1,12 +1,15 @@
+{{- /* keep the password from the existing secret on upgrades, otherwise make a random one */}}
+{{- $old := (lookup "v1" "Secret" .Release.Namespace "db").data | default dict }}
+{{- $password := .Values.postgres.password | default (b64dec ($old.POSTGRES_PASSWORD | default "")) | default (randAlphaNum 24) }}
 apiVersion: v1
 kind: Secret
 metadata:
   name: db
 stringData:
   POSTGRES_USER: {{ .Values.postgres.user }}
-  POSTGRES_PASSWORD: {{ .Values.postgres.password }}
+  POSTGRES_PASSWORD: {{ $password }}
   POSTGRES_DB: {{ .Values.postgres.db }}
-  DATABASE_URL: postgresql+psycopg://{{ .Values.postgres.user }}:{{ .Values.postgres.password }}@postgres:5432/{{ .Values.postgres.db }}
+  DATABASE_URL: postgresql+psycopg://{{ .Values.postgres.user }}:{{ $password }}@postgres:5432/{{ .Values.postgres.db }}
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim

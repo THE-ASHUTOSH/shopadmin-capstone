@@ -17,7 +17,7 @@ frontend:
 
 postgres:
   user: shop
-  password: shop
+  password: ""   # empty = random, generated once and kept on upgrades
   db: shop
   storage: 1Gi
 
