@@ -7,7 +7,7 @@ variable "cluster_name" {
 }
 
 variable "node_type" {
-  default = "t3.medium"
+  default = "t3.small"
 }
 
 variable "node_count" {

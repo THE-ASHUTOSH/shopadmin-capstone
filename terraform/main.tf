@@ -24,7 +24,13 @@ module "eks" {
   version = "~> 20.0"
 
   cluster_name    = var.cluster_name
-  cluster_version = "1.33"
+  cluster_version = "1.37"
+
+  # no kms key or cloudwatch logs, both keep billing after destroy and aren't needed here
+  create_kms_key              = false
+  cluster_encryption_config   = {}
+  create_cloudwatch_log_group = false
+  cluster_enabled_log_types   = []
 
   vpc_id     = module.vpc.vpc_id
   subnet_ids = module.vpc.private_subnets
@@ -34,6 +40,7 @@ module "eks" {
 
   eks_managed_node_groups = {
     default = {
+      ami_type       = "AL2023_x86_64_STANDARD"
       instance_types = [var.node_type]
       min_size       = 1
       max_size       = 3
