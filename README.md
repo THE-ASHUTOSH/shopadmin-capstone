@@ -92,9 +92,10 @@ metrics. `tests/conftest.py` swaps the db for in-memory sqlite so tests never to
 1. **test** - pytest, then `npm ci && npm run build` for the frontend. If a test fails, nothing else runs.
 2. **build** - builds both images tagged with the commit sha, scans them with Trivy, then pushes to
    `ghcr.io/the-ashutosh/shopadmin-backend` and `-frontend` (push only happens on `main`, not on PRs).
-3. **deploy** - `helm upgrade --install` with the new sha tag. It is switched off for now because there is no
-   cloud cluster yet. To turn it on: add repo variable `DEPLOY_ENABLED=true` and secret `KUBECONFIG_B64`
-   (`base64 -w0 ~/.kube/config`).
+3. **deploy** - starts a throwaway kind cluster inside the runner, loads the two images it just pushed,
+   runs `helm upgrade --install` with the new sha tag and `--wait`, then curls `/api/products/stats` through the
+   frontend. So a green run means the chart and images really come up and talk to postgres. An always-on EKS
+   cluster would cost ~$150/month, so it is only brought up with terraform when needed (see below).
 
 Image tags are the git sha, so every image in the registry points back to exactly one commit.
 
