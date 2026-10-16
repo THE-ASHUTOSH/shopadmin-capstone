@@ -181,7 +181,7 @@ kubectl port-forward -n monitoring svc/monitoring-grafana 3001:80
 ## Terraform (AWS)
 
 `terraform/` creates a VPC (2 public + 2 private subnets in 2 AZs, one NAT gateway) and an EKS cluster with one
-managed node group (2x t3.medium), in `ap-south-1` by default.
+managed node group (2x t3.small), in `ap-south-1` by default.
 
 ```bash
 cd terraform
@@ -211,28 +211,33 @@ The GHCR packages need to be public (package settings on GitHub) or the cluster 
 terraform destroy
 ```
 
-Right now only `terraform init` and `terraform validate` have been run - there is no AWS account yet.
+This was applied once in `ap-south-1` (49 resources, ~12 min), checked in the console and with `kubectl get nodes`,
+then destroyed the same day - about 25 minutes of runtime in total. To keep it cheap on a free-plan account the nodes
+are t3.small and EKS is on 1.37 (older versions are in extended support, which costs 6x more per hour). The app
+itself was not deployed on EKS for that run: the load balancer and the postgres volume would be created by Kubernetes,
+not terraform, so `terraform destroy` would not clean them up. The app runs on minikube instead.
 
 ## Screenshots
 
-Everything in [screenshots/](screenshots/) was taken from the real running setup (minikube + docker compose on
-my laptop, and the first GitHub Actions run).
+Everything in [screenshots/](screenshots/) was taken from the real running setup (docker compose and minikube on
+my laptop, the GitHub Actions run, and the EKS cluster on AWS).
 
 | what | file |
 |---|---|
 | app through the ingress | [01](screenshots/01-app-ingress.png), [08 phone](screenshots/08-phone.png) |
 | add / duplicate sku / edit / delete / search | [02](screenshots/02-add-product-form.png), [03](screenshots/03-product-added.png), [04](screenshots/04-duplicate-sku-error.png), [05](screenshots/05-edited-low-stock.png), [06](screenshots/06-deleted.png), [07](screenshots/07-search-filter.png) |
-| docker compose on localhost:3000 | [09](screenshots/09-docker-compose-localhost-3000.png), [14](screenshots/14-docker-compose.png) |
+| docker compose up --build, localhost:3000 | [14 up](screenshots/14-docker-compose-up.png), [14 ps](screenshots/14-docker-compose.png), [09](screenshots/09-docker-compose-localhost-3000.png) |
 | swagger | [10](screenshots/10-swagger.png) |
 | pytest -v | [13](screenshots/13-pytest.png) |
-| trivy in the pipeline | [15](screenshots/15-trivy-ci.png) |
+| trivy in the pipeline | [15 backend](screenshots/15-trivy-ci-backend.png), [15 frontend](screenshots/15-trivy-ci-frontend.png) |
 | kubectl get pods / svc / ingress, helm list | [16](screenshots/16-kubectl-helm.png) |
 | HPA idle and scaling 2 -> 5 | [17](screenshots/17-hpa-idle.png), [18](screenshots/18-hpa-scaled.png) |
 | /metrics, prometheus targets, grafana | [19](screenshots/19-metrics.png), [11](screenshots/11-prometheus-targets.png), [12](screenshots/12-grafana-dashboard.png) |
-| terraform init + validate | [20](screenshots/20-terraform.png) |
+| terraform init + validate, plan | [20](screenshots/20-terraform-init.png), [22](screenshots/22-terraform-plan.png) |
+| EKS up: terraform output, nodes, pods | [23](screenshots/23-eks-cluster.png) |
+| AWS console: VPC, subnets, EKS cluster, nodes | [24](screenshots/24-aws-vpc.png), [25](screenshots/25-aws-subnets.png), [26](screenshots/26-aws-eks-cluster.png), [27](screenshots/27-aws-eks-nodes.png) |
+| terraform destroy | [28](screenshots/28-terraform-destroy.png) |
 | git log | [21](screenshots/21-git-log.png) |
-
-Not there yet: terraform plan/apply/destroy and the AWS console, those need an AWS account.
 
 ## Troubleshooting demo
 
