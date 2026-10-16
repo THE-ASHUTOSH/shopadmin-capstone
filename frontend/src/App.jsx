@@ -23,12 +23,16 @@ export default function App() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
   const [form, setForm] = useState(null)
+  const [categories, setCategories] = useState([])
 
   async function load() {
     try {
       const params = new URLSearchParams({ q, category })
       const [list, s] = await Promise.all([api('?' + params), api('/stats')])
       setProducts(list)
+      // a filtered list doesn't have every category, so only replace the dropdown when nothing is filtered
+      const names = list.map((p) => p.category)
+      setCategories((old) => [...new Set(q || category ? [...old, ...names] : names)].sort())
       setStats(s)
       setError('')
     } catch (e) {
@@ -60,7 +64,6 @@ export default function App() {
     load()
   }
 
-  const categories = [...new Set(products.map((p) => p.category))]
   const field = (key) => ({ value: form[key], onChange: (e) => setForm({ ...form, [key]: e.target.value }) })
 
   return (
