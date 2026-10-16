@@ -39,6 +39,9 @@ def test_update(client):
     res = client.put(f"/api/products/{pid}", json={"stock": 3})
     assert res.json()["stock"] == 3
     assert res.json()["name"] == "Mouse"
+    # null means "leave it", not "clear it"
+    assert client.put(f"/api/products/{pid}", json={"name": None}).json()["name"] == "Mouse"
+    assert client.put("/api/products/999", json={"stock": 1}).status_code == 404
 
 
 def test_delete(client):

@@ -81,7 +81,7 @@ def create_product(data: ProductIn, db: Session = Depends(get_db)):
 @app.put("/api/products/{product_id}", response_model=ProductOut)
 def update_product(product_id: int, data: ProductUpdate, db: Session = Depends(get_db)):
     product = find(db, product_id)
-    for key, value in data.model_dump(exclude_unset=True).items():
+    for key, value in data.model_dump(exclude_unset=True, exclude_none=True).items():
         setattr(product, key, value)
     return save(db, product)
 
