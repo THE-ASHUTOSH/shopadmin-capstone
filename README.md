@@ -78,7 +78,7 @@ The backend container runs `alembic upgrade head` before starting uvicorn.
 cd backend
 python -m venv .venv
 .venv/Scripts/activate        # linux/mac: source .venv/bin/activate
-pip install -r requirements.txt
+pip install -r requirements-dev.txt
 pytest -v
 ```
 
