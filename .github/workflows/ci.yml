@@ -1,0 +1,86 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+        working-directory: backend
+      - run: pytest -v
+        working-directory: backend
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - run: npm ci && npm run build
+        working-directory: frontend
+
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v7
+      - name: image names
+        run: echo "PREFIX=ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/shopadmin" >> $GITHUB_ENV
+      - run: |
+          docker build -t $PREFIX-backend:${{ github.sha }} ./backend
+          docker build -t $PREFIX-frontend:${{ github.sha }} ./frontend
+
+      # pinned to the v0.36.0 commit
+      - name: trivy scan backend
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25
+        with:
+          image-ref: ${{ env.PREFIX }}-backend:${{ github.sha }}
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: "1"
+      - name: trivy scan frontend
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25
+        with:
+          image-ref: ${{ env.PREFIX }}-frontend:${{ github.sha }}
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: "1"
+
+      - if: github.event_name == 'push'
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - if: github.event_name == 'push'
+        run: |
+          docker push $PREFIX-backend:${{ github.sha }}
+          docker push $PREFIX-frontend:${{ github.sha }}
+
+  # off until there is a real cluster: set repo variable DEPLOY_ENABLED=true and secret KUBECONFIG_B64
+  deploy:
+    needs: build
+    if: github.event_name == 'push' && vars.DEPLOY_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: azure/setup-helm@v5
+      - run: |
+          mkdir -p ~/.kube
+          echo "${{ secrets.KUBECONFIG_B64 }}" | base64 -d > ~/.kube/config
+      - run: |
+          owner=${GITHUB_REPOSITORY_OWNER,,}
+          helm upgrade --install shopadmin ./helm/shopadmin -n shopadmin --create-namespace \
+            -f helm/shopadmin/values-eks.yaml \
+            --set backend.image=ghcr.io/$owner/shopadmin-backend \
+            --set frontend.image=ghcr.io/$owner/shopadmin-frontend \
+            --set tag=${{ github.sha }} \
+            --wait
