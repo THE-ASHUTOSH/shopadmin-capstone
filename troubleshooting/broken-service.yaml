@@ -1,0 +1,10 @@
+# selector says app=backnd, pods are labelled app=backend -> no endpoints
+apiVersion: v1
+kind: Service
+metadata:
+  name: broken-service
+  namespace: shopadmin
+spec:
+  selector: { app: backnd }
+  ports:
+    - port: 8000
