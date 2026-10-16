@@ -1,0 +1,47 @@
+# grafana sidecar loads any configmap with this label
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: shopadmin-dashboard
+  namespace: monitoring
+  labels:
+    grafana_dashboard: "1"
+data:
+  shopadmin.json: |
+    {
+      "title": "ShopAdmin",
+      "uid": "shopadmin",
+      "refresh": "10s",
+      "time": { "from": "now-30m", "to": "now" },
+      "panels": [
+        {
+          "title": "Requests per second",
+          "type": "timeseries",
+          "gridPos": { "x": 0, "y": 0, "w": 12, "h": 8 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "targets": [{ "expr": "sum by (handler) (rate(http_requests_total{namespace=\"shopadmin\"}[1m]))", "legendFormat": "{{handler}}" }]
+        },
+        {
+          "title": "p95 latency (s)",
+          "type": "timeseries",
+          "gridPos": { "x": 12, "y": 0, "w": 12, "h": 8 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "targets": [{ "expr": "histogram_quantile(0.95, sum by (le) (rate(http_request_duration_seconds_bucket{namespace=\"shopadmin\"}[5m])))", "legendFormat": "p95" }]
+        },
+        {
+          "title": "Error rate (5xx/s)",
+          "type": "timeseries",
+          "gridPos": { "x": 0, "y": 8, "w": 12, "h": 8 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "targets": [{ "expr": "sum(rate(http_requests_total{namespace=\"shopadmin\", status=\"5xx\"}[1m])) or vector(0)", "legendFormat": "5xx" }]
+        },
+        {
+          "title": "Backend pods",
+          "type": "stat",
+          "gridPos": { "x": 12, "y": 8, "w": 12, "h": 8 },
+          "datasource": { "type": "prometheus", "uid": "prometheus" },
+          "targets": [{ "expr": "count(up{namespace=\"shopadmin\", service=\"backend\"} == 1)" }]
+        }
+      ],
+      "schemaVersion": 39
+    }

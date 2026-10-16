@@ -1,0 +1,15 @@
+# values for prometheus-community/kube-prometheus-stack
+prometheus:
+  prometheusSpec:
+    # pick up ServiceMonitors from every namespace, not only ones made by this chart
+    serviceMonitorSelectorNilUsesHelmValues: false
+    retention: 2d
+
+alertmanager:
+  enabled: false
+
+grafana:
+  sidecar:
+    dashboards:
+      enabled: true
+      label: grafana_dashboard
