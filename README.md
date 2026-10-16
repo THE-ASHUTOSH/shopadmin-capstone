@@ -92,7 +92,7 @@ metrics. `tests/conftest.py` swaps the db for in-memory sqlite so tests never to
 1. **test** - pytest, then `npm ci && npm run build` for the frontend. If a test fails, nothing else runs.
 2. **build** - builds both images tagged with the commit sha, scans them with Trivy, then pushes to
    `ghcr.io/the-ashutosh/shopadmin-backend` and `-frontend` (push only happens on `main`, not on PRs).
-3. **deploy** - starts a throwaway kind cluster inside the runner, loads the two images it just pushed,
+3. **deploy** - starts a throwaway k3s cluster on the runner, loads the two images it just pushed,
    runs `helm upgrade --install` with the new sha tag and `--wait`, then curls `/api/products/stats` through the
    frontend. So a green run means the chart and images really come up and talk to postgres. An always-on EKS
    cluster would cost ~$150/month, so it is only brought up with terraform when needed (see below).
@@ -130,7 +130,7 @@ helm list -n shopadmin
 
 What the chart creates:
 
-- backend and frontend Deployments, 2 replicas each, with liveness/readiness probes and resource limits
+- backend and frontend Deployments, 2 replicas each, with resource limits, readiness probes on both and a liveness probe on the backend
 - ClusterIP Services `backend`, `frontend`, `postgres`
 - postgres Deployment with a PVC, credentials in a Secret
 - Ingress: `/api` goes to the backend, everything else to the frontend
@@ -154,8 +154,8 @@ kubectl delete pod -n <ns> <pod>
 ### Open the app through the ingress
 
 On Windows/mac with the docker driver the minikube IP isn't reachable, so run `minikube tunnel` in another
-terminal and add `127.0.0.1 shopadmin.local` to the hosts file
-(`C:\Windows\System32\drivers\etc\hosts`). Then open http://shopadmin.local.
+terminal and add `127.0.0.1 shopadmin.local` to the hosts file (`/etc/hosts` on mac,
+`C:\Windows\System32\drivers\etc\hosts` on Windows). Then open http://shopadmin.local.
 
 ### Autoscaling demo
 
@@ -213,7 +213,7 @@ terraform destroy
 ```
 
 This was applied once in `ap-south-1` (49 resources, ~12 min), checked in the console and with `kubectl get nodes`,
-then destroyed the same day - about 25 minutes of runtime in total. To keep it cheap on a free-plan account the nodes
+then destroyed the same day - about 27 minutes of runtime in total. To keep it cheap on a free-plan account the nodes
 are t3.small and EKS is on 1.37 (older versions are in extended support, which costs 6x more per hour). The app
 itself was not deployed on EKS for that run: the load balancer and the postgres volume would be created by Kubernetes,
 not terraform, so `terraform destroy` would not clean them up. The app runs on minikube instead.
