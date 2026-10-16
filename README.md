@@ -213,6 +213,27 @@ terraform destroy
 
 Right now only `terraform init` and `terraform validate` have been run - there is no AWS account yet.
 
+## Screenshots
+
+Everything in [screenshots/](screenshots/) was taken from the real running setup (minikube + docker compose on
+my laptop, and the first GitHub Actions run).
+
+| what | file |
+|---|---|
+| app through the ingress | [01](screenshots/01-app-ingress.png), [08 phone](screenshots/08-phone.png) |
+| add / duplicate sku / edit / delete / search | [02](screenshots/02-add-product-form.png), [03](screenshots/03-product-added.png), [04](screenshots/04-duplicate-sku-error.png), [05](screenshots/05-edited-low-stock.png), [06](screenshots/06-deleted.png), [07](screenshots/07-search-filter.png) |
+| docker compose on localhost:3000 | [09](screenshots/09-docker-compose-localhost-3000.png), [14](screenshots/14-docker-compose.png) |
+| swagger | [10](screenshots/10-swagger.png) |
+| pytest -v | [13](screenshots/13-pytest.png) |
+| trivy in the pipeline | [15](screenshots/15-trivy-ci.png) |
+| kubectl get pods / svc / ingress, helm list | [16](screenshots/16-kubectl-helm.png) |
+| HPA idle and scaling 2 -> 5 | [17](screenshots/17-hpa-idle.png), [18](screenshots/18-hpa-scaled.png) |
+| /metrics, prometheus targets, grafana | [19](screenshots/19-metrics.png), [11](screenshots/11-prometheus-targets.png), [12](screenshots/12-grafana-dashboard.png) |
+| terraform init + validate | [20](screenshots/20-terraform.png) |
+| git log | [21](screenshots/21-git-log.png) |
+
+Not there yet: terraform plan/apply/destroy and the AWS console, those need an AWS account.
+
 ## Troubleshooting demo
 
 ```bash
